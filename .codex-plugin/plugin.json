@@ -1,6 +1,6 @@
 {
   "name": "mogoo-codex-next",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "repository": "https://github.com/MogooStudio/mogoo-codex-next",
   "description": "在 Codex 右侧生成下一步建议，使用独立模型配置。",
   "author": {

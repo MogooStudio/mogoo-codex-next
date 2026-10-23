@@ -76,7 +76,7 @@ An empty result is valid when there is no useful follow-up. Failed requests do n
 
 *The 0.1.13 model picker in an offline preview. Catalog entries are synthetic and do not imply provider availability.*
 
-For relay keys, a blank field preserves the saved key for the same endpoint; a new value replaces it. Select the explicit clear option and save to remove it. Changing the endpoint requires a key for the new address. Enter keys in the panel, never in a chat message or command argument.
+For relay keys, a blank field preserves the saved key for the same endpoint; a new value replaces it. Click **清除** (Clear) beside the API Key label and save to remove it; **取消清除** (Cancel clear) cancels the pending removal before saving. Changing the endpoint requires a key for the new address. Enter keys in the panel, never in a chat message or command argument.
 
 ## Development
 

@@ -104,14 +104,14 @@
       this.snapshot = null; this.config = {}; this.hostCapabilities = {}; this.hostContext = {};
       this.initialized = false; this.closed = false; this.busy = false; this.polling = false;
       this.inViewport = true; this.pollTimer = null; this.noticeTimer = null; this.epoch = 0;
-      this.settingsDirty = false; this.settingsOpen = false; this.connectionError = "";
+      this.settingsDirty = false; this.settingsOpen = false; this.connectionError = ""; this.clearApiKey = false;
       this.catalogEpoch = 0; this.catalogKey = ""; this.catalogLoading = false;
       this.modelEntries = []; this.modelPickerOpen = false; this.filteredModels = [];
       this.suspended = false; this.view = "suggestions"; this.skin = "graphite"; this.skinBusy = false; this.appearanceEpoch = 0; this.viewPositions = {};
       this.pendingAuto = null;
       this.previewSuggestions = []; this.draftButtons = [];
       this.el = {};
-      for (const id of ["thread-title", "auto-generate", "refresh", "model-summary", "status", "status-symbol", "status-title", "status-detail", "status-action", "suggestions", "draft-note", "usage", "settings", "settings-toggle", "settings-close", "settings-form", "provider", "model", "model-list", "load-models", "models-status", "reasoning-effort", "service-tier", "relay-fields", "base-url", "api-key", "api-key-status", "clear-api-key", "clear-api-key-row", "codex-bin", "settings-message", "save-settings", "notice", "close-panel", "app", "panel-scroll", "suggestion-header", "view-header", "view-title", "suggestion-view", "usage-view", "savebar", "settings-dirty", "suggestion-count", "check-model", "usage-open", "usage-label", "usage-arrow", "usage-calls", "usage-failures", "usage-records", "skin-graphite", "skin-annotation", "skin-focus", "discard-dialog", "discard-continue", "discard-confirm"]) this.el[id] = doc.getElementById(id);
+      for (const id of ["thread-title", "auto-generate", "refresh", "model-summary", "status", "status-symbol", "status-title", "status-detail", "status-action", "suggestions", "draft-note", "usage", "settings", "settings-toggle", "settings-close", "settings-form", "provider", "model", "model-list", "load-models", "models-status", "reasoning-effort", "service-tier", "relay-fields", "base-url", "api-key", "api-key-status", "clear-api-key", "codex-bin", "settings-message", "save-settings", "notice", "close-panel", "app", "panel-scroll", "suggestion-header", "view-header", "view-title", "suggestion-view", "usage-view", "savebar", "settings-dirty", "suggestion-count", "check-model", "usage-open", "usage-label", "usage-arrow", "usage-calls", "usage-failures", "usage-records", "skin-graphite", "skin-annotation", "skin-focus", "discard-dialog", "discard-continue", "discard-confirm"]) this.el[id] = doc.getElementById(id);
       this.unsubscribe = bridge.subscribe((message) => this.onHostMessage(message));
       this.onVisibility = () => this.syncVisibility();
       this.onPageHide = () => this.suspend(true);
@@ -126,7 +126,7 @@
         });
         this.observer.observe(doc.documentElement);
       }
-      for (const id of ["relay-preset", "relay-preset-field", "relay-preset-hint", "model-picker", "model-toggle", "model-menu", "model-search", "model-count", "model-empty"]) this.el[id] = doc.getElementById(id);
+      for (const id of ["relay-preset", "relay-preset-field", "model-picker", "model-toggle", "model-menu", "model-search", "model-count", "model-empty"]) this.el[id] = doc.getElementById(id);
       this.onModelOutside = event => { if (!this.el["model-picker"].contains(event.target)) this.closeModelPicker(); };
       doc.addEventListener("pointerdown", this.onModelOutside);
       this.bindControls(); this.render();
@@ -135,7 +135,7 @@
     async start() {
       try {
         const info = await this.bridge.request("ui/initialize", {
-          appInfo: { name: "mogoo-codex-next", version: "0.1.13" },
+          appInfo: { name: "mogoo-codex-next", version: "0.1.14" },
           appCapabilities: { availableDisplayModes: ["inline", "fullscreen"] },
           protocolVersion: "2026-01-26",
         });
@@ -162,8 +162,14 @@
         else if (!this.snapshot?.panel_id) this.reconnect();
         else this.action("next_refresh");
       });
-      this.el["settings-form"].addEventListener("input", (event) => { if (event?.target === this.el["model-search"]) return; this.settingsDirty = true; this.el["settings-dirty"].hidden = false; if (event?.target === this.el["api-key"] && this.el["api-key"].value) this.el["clear-api-key"].checked = false; if (event?.target === this.el["base-url"]) { this.el["api-key"].value = ""; this.el["clear-api-key"].checked = false; } this.syncCatalogSource(); if (event?.target === this.el.model) this.renderModelPicker(); });
-      this.el["clear-api-key"].addEventListener("change", () => { this.settingsDirty = true; this.el["settings-dirty"].hidden = false; if (this.el["clear-api-key"].checked) this.el["api-key"].value = ""; this.catalogKey = ""; this.syncCatalogSource(); });
+      this.el["settings-form"].addEventListener("input", (event) => { if (event?.target === this.el["model-search"]) return; this.settingsDirty = true; this.el["settings-dirty"].hidden = false; if (event?.target === this.el["api-key"] && this.el["api-key"].value) this.clearApiKey = false; if (event?.target === this.el["base-url"]) { this.el["api-key"].value = ""; this.clearApiKey = false; } this.syncCatalogSource(); if (event?.target === this.el.model) this.renderModelPicker(); });
+      this.el["clear-api-key"].addEventListener("click", () => {
+        if (!this.initialized || this.busy || this.closed || !this.config.api_key_present) return;
+        this.clearApiKey = !this.clearApiKey;
+        this.settingsDirty = true; this.el["settings-dirty"].hidden = false;
+        if (this.clearApiKey) this.el["api-key"].value = "";
+        this.catalogKey = ""; this.syncCatalogSource();
+      });
       this.el.provider.addEventListener("change", () => { this.settingsDirty = true; this.showRelay(); });
       this.el["relay-preset"].addEventListener("change", () => this.chooseRelayPreset());
       this.el["settings-form"].addEventListener("submit", (event) => { event.preventDefault(); this.saveSettings(); });
@@ -418,10 +424,9 @@
       this.el.provider.value = config.provider === "relay" ? "relay" : "official";
       for (const [id, field] of [["model", "model"], ["reasoning-effort", "reasoning_effort"], ["service-tier", "service_tier"], ["base-url", "base_url"], ["codex-bin", "codex_bin"]]) this.el[id].value = typeof config[field] === "string" ? config[field] : (field === "reasoning_effort" ? "low" : "");
       this.el["api-key"].value = "";
-      this.el["clear-api-key"].checked = false;
+      this.clearApiKey = false;
       const address = this.el["base-url"].value.trim().replace(/\/+$/, "");
       this.el["relay-preset"].value = Object.keys(RELAY_PRESETS).find(id => RELAY_PRESETS[id] === address) || (address ? "custom" : "aicodewith");
-      this.el["clear-api-key-row"].hidden = !config.api_key_present;
       this.showRelay();
     }
     savedRelayKeyForAddress() {
@@ -429,13 +434,16 @@
     }
     updateRelayKeyHint() {
       const saved = this.savedRelayKeyForAddress();
+      this.el["clear-api-key"].hidden = !this.config.api_key_present;
+      this.el["clear-api-key"].textContent = this.clearApiKey ? "取消清除" : "清除";
+      this.el["clear-api-key"].setAttribute("aria-label", this.clearApiKey ? "取消清除已保存的 API Key" : "清除已保存的 API Key");
+      this.el["clear-api-key"].setAttribute("aria-pressed", String(this.clearApiKey));
       this.el["api-key"].placeholder = saved ? "已保存，留空继续使用；填写可替换" : "粘贴所选中转站的 API Key";
-      this.el["api-key-status"].textContent = saved ? (this.config.api_key_error || "API Key 已保存，留空继续使用。") : "请输入所选中转站的 API Key，加密保存在本机。";
+      this.el["api-key-status"].textContent = this.clearApiKey ? "保存后清除 API Key。" : saved ? (this.config.api_key_error || "API Key 已保存，留空继续使用。") : "请输入所选中转站的 API Key，加密保存在本机。";
     }
     syncRelayPreset() {
       const preset = RELAY_PRESETS[this.el["relay-preset"].value];
       this.el["base-url"].readOnly = !!preset;
-      this.el["relay-preset-hint"].textContent = preset ? "API 地址已填好，填写对应的 API Key 即可。" : "使用其他中转站时，填写 API 地址和对应的 API Key。";
     }
     chooseRelayPreset() {
       if (this.busy || this.closed) return;
@@ -443,13 +451,13 @@
       if (preset && this.el["base-url"].value.trim().replace(/\/+$/, "") !== preset) {
         this.el["base-url"].value = preset;
         this.el["api-key"].value = "";
-        this.el["clear-api-key"].checked = false;
+        this.clearApiKey = false;
       }
       this.settingsDirty = true; this.el["settings-dirty"].hidden = false;
       this.settingsMessage(""); this.syncRelayPreset(); this.syncCatalogSource();
     }
     hasRelayKey() {
-      return !this.el["clear-api-key"].checked && (!!this.el["api-key"].value.trim() ||
+      return !this.clearApiKey && (!!this.el["api-key"].value.trim() ||
         this.savedRelayKeyForAddress());
     }
     catalogSource() {
@@ -483,7 +491,7 @@
         service_tier: this.el["service-tier"].value,
         base_url: this.el["base-url"].value.trim(),
         ...(this.el["api-key"].value.trim() ? { api_key: this.el["api-key"].value.trim() } : {}),
-        clear_api_key: this.el["clear-api-key"].checked,
+        clear_api_key: this.clearApiKey,
         codex_bin: this.el["codex-bin"].value.trim() || null,
       };
       if (changes.provider === "relay" && !changes.clear_api_key && (!changes.base_url || !this.hasRelayKey())) {
@@ -531,6 +539,7 @@
       this.el["save-settings"].disabled = !this.initialized || this.busy || this.closed;
       this.el["load-models"].disabled = !this.initialized || this.busy || this.closed || this.catalogLoading;
       this.el["relay-preset"].disabled = !this.initialized || this.busy || this.closed;
+      this.el["clear-api-key"].disabled = !this.initialized || this.busy || this.closed;
       this.el["model-toggle"].disabled = !this.initialized || this.busy || this.closed;
       this.el["model-search"].disabled = !this.initialized || this.busy || this.closed;
       for (const option of this.el["model-list"].children) option.disabled = !this.initialized || this.busy || this.closed;

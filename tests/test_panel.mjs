@@ -572,13 +572,22 @@ test("explicit key clearing is saved without sending a key", async () => {
   const env = setup(); const panel = new Panel(env.win, env.doc, env.bridge);
   panel.initialized = true;
   panel.acceptResult(snapshot({ config: { provider: "relay", base_url: "https://relay.example/v1", model: "r", api_key_present: true } }));
-  env.elements["clear-api-key"].checked = true;
+  const clearKey = env.elements["clear-api-key"];
+  clearKey.events.get("click")();
+  assert.equal(clearKey.textContent, "取消清除");
+  assert.match(env.elements["api-key-status"].textContent, /保存后清除/);
+  assert.equal(env.sent.filter(m => m.params?.name === "next_configure").length, 0, "clearing remains pending until save");
+  clearKey.events.get("click")();
+  assert.equal(clearKey.textContent, "清除");
+  assert.equal(panel.hasRelayKey(), true, "cancelling preserves the saved key");
+  clearKey.events.get("click")();
   env.respond(() => ({ structuredContent: { config: { ...panel.config, api_key_present: false } } }));
   await panel.saveSettings();
   const changes = env.sent.find(m => m.params?.name === "next_configure").params.arguments.changes;
   assert.equal(changes.clear_api_key, true);
   assert.equal(Object.hasOwn(changes, "api_key"), false);
   assert.equal(env.elements["api-key"].value, "");
+  assert.equal(clearKey.hidden, true);
   await panel.dispose(); env.bridge.dispose();
 });
 
@@ -589,8 +598,7 @@ test("clearing the key invalidates a pending directory response", async () => {
   env.respond(() => undefined);
   const pending = panel.loadModels();
   const request = env.sent.find(m => m.params?.name === "next_models");
-  env.elements["clear-api-key"].checked = true;
-  env.elements["clear-api-key"].events.get("change")();
+  env.elements["clear-api-key"].events.get("click")();
   env.deliver({ id: request.id, result: { structuredContent: { provider: "relay", models: [{ id: "stale" }] } } });
   await pending;
   assert.equal(env.elements["model-list"].children.length, 0);
