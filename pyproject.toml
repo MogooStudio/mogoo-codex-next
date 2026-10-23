@@ -1,0 +1,11 @@
+[project]
+name = "mogoo-codex-next"
+version = "0.1.13"
+description = "Conversation-scoped next-step suggestions for Codex"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "mogoo"}]
+dependencies = []
+
+[tool.unittest]
+start-directory = "tests"

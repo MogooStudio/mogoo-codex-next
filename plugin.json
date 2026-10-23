@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "mogoo-codex-next",
+  "version": "0.1.13",
+  "description": "在 Codex 对话右侧生成可编辑的下一步建议，使用插件独立模型配置。",
+  "author": {
+    "name": "mogoo",
+    "url": "https://github.com/MogooStudio"
+  },
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "Mogoo Codex Next",
+        "shortDescription": "在对话右侧选择下一步",
+        "longDescription": "使用独立模型为当前聊天生成下一步建议。打开面板自动生成，关闭后暂停；采纳仅填入草稿，由你发送。模型调用按所选服务计量。",
+        "developerName": "mogoo",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "defaultPrompt": [
+          "打开当前聊天的下一步建议面板。",
+          "检查 Mogoo Codex Next 的配置和运行状态。"
+        ]
+      }
+    }
+  }
+}

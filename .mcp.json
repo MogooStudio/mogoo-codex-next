@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mogoo-codex-next": {
+      "command": "python",
+      "args": ["${PLUGIN_ROOT}/scripts/run.py", "serve"]
+    }
+  }
+}
