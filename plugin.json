@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mogoo-codex-next",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "在 Codex 对话右侧生成可编辑的下一步建议，使用插件独立模型配置。",
   "author": {
     "name": "mogoo",

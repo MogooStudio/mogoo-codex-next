@@ -135,7 +135,7 @@
     async start() {
       try {
         const info = await this.bridge.request("ui/initialize", {
-          appInfo: { name: "mogoo-codex-next", version: "0.1.14" },
+          appInfo: { name: "mogoo-codex-next", version: "0.1.15" },
           appCapabilities: { availableDisplayModes: ["inline", "fullscreen"] },
           protocolVersion: "2026-01-26",
         });
@@ -149,7 +149,7 @@
       } catch (error) { this.connectionError = publicError(error); this.render(); }
     }
     bindControls() {
-      this.el["settings-toggle"].addEventListener("click", () => this.showSettings(!this.settingsOpen));
+      this.el["settings-toggle"].addEventListener("click", () => this.showSettings(true));
       this.el["settings-close"].addEventListener("click", () => this.showSettings(false));
       this.el.refresh.addEventListener("click", () => this.action("next_refresh"));
       this.el["auto-generate"].addEventListener("change", () => {
@@ -187,7 +187,6 @@
       });
       this.el["model-picker"].addEventListener("focusout", event => { if (event.relatedTarget && !this.el["model-picker"].contains(event.relatedTarget)) this.closeModelPicker(); });
       this.el["close-panel"].addEventListener("click", () => this.close());
-      this.el["model-summary"].addEventListener("click", () => this.showSettings(true));
       this.el["usage-open"].addEventListener("click", () => this.openView("usage"));
       this.el["check-model"].addEventListener("click", () => this.showSettings(true));
       for (const skin of ["graphite", "annotation", "focus"]) this.el[`skin-${skin}`].addEventListener("click", () => this.changeSkin(skin));
