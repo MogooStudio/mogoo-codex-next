@@ -71,12 +71,11 @@ Codex normally upgrades Git marketplaces and installed plugin caches in the back
 
 If a newer version is installed while the process still runs an older version, the footer shows a pending activation notice that cannot be dismissed: “Updated to X; currently running Y. Start a new chat or restart Codex to activate the update.” We have not confirmed whether the observed new MCP process was triggered by a new chat or a Codex restart, so both options remain in the guidance.
 
-When the remote version is newer than the installed version, public `mogoo-codex-plugin` installations explain that Codex normally updates in the background; Update now is also available. A secondary **立即更新** (Update now) button remains available after explicit command confirmation. It skips marketplace upgrade when the snapshot is ready, and runs no commands when Codex has already installed the target. Development and other sources offer copying commands or appending instructions to your draft for you to send. Only uninstalled remote versions can be ignored. Review and trust changed Hooks when requested.
+When the remote version is newer than the installed version, public `mogoo-codex-plugin` installations explain that Codex normally updates in the background; Update now is also available. A secondary **立即更新** (Update now) button remains available after explicit command confirmation. It installs Next directly from the GitHub release repository and skips installation when the target version is already present. Development and other sources offer copying commands or appending instructions to your draft for you to send. Only uninstalled remote versions can be ignored. Review and trust changed Hooks when requested.
 
 Git-based marketplace installation and upgrades require `git` on PATH. Checking tags itself does not require Git. Failed updates are never retried automatically; use:
 
 ```sh
-codex plugin marketplace upgrade mogoo-codex-plugin
 codex plugin add mogoo-codex-next@mogoo-codex-plugin
 ```
 
@@ -134,7 +133,7 @@ Choose a fresh output path for each build. Both MCP manifests use the plugin's l
 
 | Path | Purpose |
 | --- | --- |
-| `.agents/plugins/marketplace.json` | Marketplace and two independently installable entries |
+| `.agents/plugins/marketplace.json` | Standalone catalog for the local Next package |
 | `.codex-plugin/plugin.json` | Codex plugin metadata and extension declarations |
 | `src/mogoo_codex_next/` | MCP server, context, generation, settings, credentials, and storage |
 | `ui/` | Panel markup, styles, and host bridge |

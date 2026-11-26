@@ -71,12 +71,11 @@ Codex 通常会在后台自动升级 Git 市场及已安装插件的缓存，不
 
 如果新版已安装、当前进程仍运行旧版，底栏显示“等待生效”，不能忽略：“已更新到 X，当前仍在运行 Y。新开聊天或重启 Codex 后生效。”当前尚未确认新进程由新开聊天还是重启 Codex 触发，因此保留两种操作的提示。
 
-远端有新版而本地尚未安装时，公开 `mogoo-codex-plugin` 市场来源会提示“发现 X。Codex 通常会在后台自动更新；也可以点击立即更新。”。也可使用次要按钮“立即更新”，先审阅并确认命令；市场快照已就绪时跳过市场升级，已经安装时不再执行命令。开发目录及其他来源只提供复制命令或填入草稿（由你自行发送）。只有尚未安装的远端版本可以忽略。Hook 变化时需重新审阅并信任。
+远端有新版而本地尚未安装时，公开 `mogoo-codex-plugin` 市场来源会提示“发现 X。Codex 通常会在后台自动更新；也可以点击立即更新。”。也可使用次要按钮“立即更新”，先审阅并确认命令；确认后，Codex 直接从 Next 的 GitHub 发行仓库安装。目标版本已安装时会跳过安装。开发目录及其他来源只提供复制命令或填入草稿（由你自行发送）。只有尚未安装的远端版本可以忽略。Hook 变化时需重新审阅并信任。
 
 Git 来源的市场安装和升级需要系统中可用的 `git`；检查更新本身无需 Git。更新失败时不自动重试，使用以下命令：
 
 ```sh
-codex plugin marketplace upgrade mogoo-codex-plugin
 codex plugin add mogoo-codex-next@mogoo-codex-plugin
 ```
 
@@ -134,7 +133,7 @@ python scripts/package.py --output dist/mogoo-codex-next-local
 
 | 路径 | 用途 |
 | --- | --- |
-| `.agents/plugins/marketplace.json` | 插件市场和两个可独立安装的条目 |
+| `.agents/plugins/marketplace.json` | Next 发行包的本机安装目录 |
 | `.codex-plugin/plugin.json` | Codex 插件元数据与扩展声明 |
 | `src/mogoo_codex_next/` | MCP 服务、上下文、生成、设置、凭据和存储 |
 | `ui/` | 面板页面、样式及宿主桥接 |
