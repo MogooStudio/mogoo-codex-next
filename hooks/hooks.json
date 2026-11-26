@@ -1,0 +1,12 @@
+{
+  "description": "记录已完成轮次用于建议刷新；不在 Hook 内调用模型，不改变原聊天。",
+  "hooks": {
+    "Stop": [{"hooks": [{
+      "type": "command",
+      "command": "\"${PLUGIN_ROOT}/scripts/launch\" hook",
+      "commandWindows": "\"${PLUGIN_ROOT}/scripts/launch.exe\" hook",
+      "async": true,
+      "timeout": 5
+    }]}]
+  }
+}
